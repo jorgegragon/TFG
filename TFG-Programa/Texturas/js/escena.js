@@ -3,19 +3,25 @@ var resultado = "Hola";
 var stepX = 0.15;
 var stepY = 0.3;
 var contador = 0;
+const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
+const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
+let floorMat;
+
+
 
 function init() {
     var scene = new THREE.Scene();
     var sceneWidth = window.innerWidth;
     var sceneHeight = window.innerHeight;
     
-    var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
+    var camera = new THREE.PerspectiveCamera(50, sceneWidth / sceneHeight, 0.01, 100);
     camera.position.x = 0;
     camera.position.y = -40;
     camera.position.z = 40;
     camera.lookAt(scene.position);
 
     var floor = getFloor();
+    
     var box = getBox();
     box.position.y = 10;
 
@@ -128,19 +134,20 @@ function init() {
 
  function getFloor() {
     var geometry = new THREE.PlaneGeometry(40, 40);
-    var material = new THREE.MeshBasicMaterial({
-       color : 0xAAAAAA
-    });
+    var material = new THREE.MeshBasicMaterial( { map: suelo });
+    material.map.wrapS = THREE.RepeatWrapping;
+	 material.map.wrapT = THREE.RepeatWrapping;
+	 material.map.anisotropy = 4;
+    material.map.repeat.set( 4, 4);
     var mesh = new THREE.Mesh(geometry, material);
     return mesh;
  }
 
  function getBox() {
-    var geometry = new THREE.BoxGeometry(3, 2, 8);
-    var material = new THREE.MeshBasicMaterial({
-       color : 0x0000ff
-    });
+    var geometry = new THREE.BoxGeometry(3, 2, 4);
+    var material = new THREE.MeshBasicMaterial( { map: texture } );
     var mesh = new THREE.Mesh(geometry, material);
+    mesh.position.z = 2
     return mesh;
  }
 
