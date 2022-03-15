@@ -6,6 +6,7 @@
 <style>
     #marcadores {
 	    position: absolute;
+        text-align:center;
 		top: 70px; width: 100%;
 		padding: 5px;
         font-size: 40px;
@@ -102,7 +103,7 @@
                 switch (ev.keyCode) {
                     case 32:
                         start = true;
-                        resultado = "Inicio";      
+                        resultado = "Register";      
                         document.getElementById("marcadores").innerHTML = resultado;
                         break;
                     default:
@@ -115,55 +116,138 @@
         function animate(sphere, renderer, scene, camera) {
 
             if (start) { // Secuencia intercambio paquetes
-                resultado = ("Empezamos...");
                 document.getElementById("marcadores").innerHTML = resultado;
 
                 if (sphere.position.y > 10){ // Proxy
-                    sphere.position.x = 0;
-                    sphere.position.y = 10;
-                    if (contador == 2 || contador == 3){
-                        stepX = 0.15;
-                        stepY = -0.3;
-                        console.log ("Proxy-Server");
-                    }else{
+                    if (contador == 0 || contador == 2 || contador == 10 || contador == 19){
+                        sphere.position.x = 0;
+                        sphere.position.y = 10;
                         stepX = -0.15;
                         stepY = -0.3;
-                        console.log ("Proxy-Cliente");
+                        switch (contador) {
+                            case 0:
+                                resultado = ("401 Unauthorized");
+                                break;
+                            case 2 || 19:
+                                resultado = ("200 OK");   
+                                break;
+                            case 10:
+                                resultado = ("100 Trying");
+                                break;
+                            default:
+                                break;
+                        }
+                        
+                    }else if (contador == 4 || contador == 6 || contador == 14 || contador == 17) {
+                        sphere.position.x = 0;
+                        sphere.position.y = 10;
+                        stepX = 0.15;
+                        stepY = -0.3;
+                        switch (contador) {
+                            case 4:
+                                resultado = ("200 OK");
+                                break;
+                            case 6:
+                                resultado = ("INVITE + SDP -> Proxy-Server");   
+                                break;
+                            case 14:
+                                resultado = ("ACK Proxy-Server");
+                                break;
+                            case 17:
+                                resultado = ("BYE");
+                                break;
+                            default:
+                                break;
+                        }
+                    }else if (contador == 8 || contador == 9) {
+                        sphere.position.x = 10;
+                        sphere.position.y = -10;
+                        stepX = -0.15;
+                        stepY = 0.3;
+                        if (contador == 8) {
+                            resultado = ("180 Ringning");
+                        }else{
+                            resultado = ("200 OK + SDP");
+                        }
                     }
                     contador += 1;
                 }
 
                 if (sphere.position.y < -10 & sphere.position.x < -5){ // Cliente
-                    if (contador == 2){
+                    if (contador == 3){
                         sphere.position.x = 10;
                         sphere.position.y = -10;
                         stepX = -0.15;
                         stepY = 0.3;
-                        console.log ("Servidor-Proxy");
+                        resultado = ("Register Server");
+                        
+                    }else if (contador == 11 || contador == 12) {
+                        sphere.position.x = 0;
+                        sphere.position.y = 10;
+                        stepX = -0.15;
+                        stepY = -0.3;
+                        if (contador == 11) {
+                            resultado = ("180 Ringning");
+                        }else{
+                            resultado = ("200 OK + SDP");
+                        }
+                    }else if (contador == 20) {
+                        contador = 0;
+                        start = false;
+                        resultado = ("Intercambio de paquetes");
+                        document.getElementById("marcadores").innerHTML = resultado;
                     }else{
                         sphere.position.x = -10;
                         sphere.position.y = -10;
                         stepX = 0.15;
                         stepY = 0.3;
+                        
+                        if (contador == 1) {
+                            resultado = ("Register");
+                        }else if (contador == 13) {
+                            resultado = ("ACK Cliente-Proxy");
+                        }
                         console.log ("Cliente-Proxy");
                     }
+                    contador += 1;
                 }
 
                 if (sphere.position.y < -10 & sphere.position.x > 5){ // Servidor
-                        if (contador == 4) {
+                    if (contador == 7 || contador == 18) { // Servidor-Proxy
                         stepX = -0.15;
                         stepY = 0.3;
                         sphere.position.x = 10;
                         sphere.position.y = -10;
-                        console.log ("2222"); 
-                        } else {
+                        if (contador == 7) {
+                            resultado = ("100 Trying");
+                        }else{
+                            resultado = ("200 OK");
+                        }
+
+                    } else if (contador == 5) { // Cliente-Servidor
                         stepX = 0.15;
                         stepY = 0.3;
                         sphere.position.x = -10;
                         sphere.position.y = -10;
-                        console.log ("1111");  
-                        }
+                        resultado = ("INVITE + SDP -> Cliente - Proxy");
                         
+                    } else if (contador == 15) {
+                        sphere.position.x =  10;
+                        sphere.position.y = -10;
+                        stepX = -0.015;
+                        stepY = 0;
+                        resultado = ("RTP");    
+                    }
+                    contador += 1;    
+                }
+
+                if (sphere.position.x < -10 && contador == 16){
+                    stepX = 0.15;
+                    stepY = 0.3;
+                    sphere.position.x = -10;
+                    sphere.position.y = -10;
+                    resultado = ("BYE");
+                    contador += 1;
                 }
 
                 sphere.position.x += stepX;
