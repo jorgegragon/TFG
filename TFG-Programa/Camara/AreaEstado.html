@@ -12,14 +12,115 @@
         color: azure;
 	}
 </style>
-
+<!--
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/103/three.min.js"></script>
-<script src="../Camara/js/escena.js" defer></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="../jsm/controls/OrbitControls.js"></script>
+<script src="../Camara/js/escena.js" defer></script>-->
+<!--
+<script type="importmap">
+    {
+        "imports": {
+            "three": "../jsm/build/three.module.js"
+        }
+    }
+</script>
+<script type="module">
+    import * as THREE from 'three';
+    import Stats from '../jsm/libs/stats.module.js';
+    import { OrbitControls } from "../jsm/controls/OrbitControls.js";
+</script>
+-->
 
 </head>
 
-<body onload="init()">
+<body>
     <div id="marcadores">Intercambio de paquetes</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../jsm/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from '../jsm/controls/OrbitControls.js';
+    
+        init();
+
+        function init() {
+            var scene = new THREE.Scene();
+            var sceneWidth = window.innerWidth;
+            var sceneHeight = window.innerHeight;
+            scene.background = new THREE.Color(0x2a3b4c);
+
+            var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
+            camera.up.set( 0, 0, 1 );
+			camera.position.set( 0, -50, 35 );
+            
+			scene.add( camera );
+
+            var floor = getFloor();
+
+            scene.add(floor);
+
+            var renderer = new THREE.WebGLRenderer({
+            antialias : true
+            });
+            renderer.setSize(sceneWidth, sceneHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const controls = new OrbitControls( camera, renderer.domElement );
+            controls.minDistance = 1;
+            controls.maxDistance = 60;
+            //controls.enableZoom = false;
+            //controls.enableRotate = false;
+            //controls.enableDamping = true;
+            //controls.dampingFactor = 0.5;
+            controls.maxPolarAngle = Math.PI/2;
+			controls.target.set( 0, 1.2, 2 );
+			controls.update();
+            window.addEventListener( 'resize', onWindowResize );
+
+
+            animate(renderer, scene, camera);
+        }
+
+
+        function animate(renderer, scene, camera) {
+
+            renderer.render(scene, camera);
+
+            requestAnimationFrame(function() {
+            animate(renderer, scene, camera);
+            });
+        }
+
+        function getFloor() {
+            var geometry = new THREE.PlaneGeometry(40, 40);
+            var material = new THREE.MeshBasicMaterial({
+            color : 0xAAAAAA
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
+        function onWindowResize() {
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+
+			animate();
+        }
+
+    </script>
+
 </body>
 
 </html>

@@ -8,6 +8,7 @@ function init() {
     var scene = new THREE.Scene();
     var sceneWidth = window.innerWidth;
     var sceneHeight = window.innerHeight;
+    scene.background = new THREE.Color(0x2a3b4c);
     
     var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
     camera.position.x = 0;
