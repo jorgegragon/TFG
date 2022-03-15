@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Three.js: ESCENA 3D</title>
+<style>
+    #marcadores {
+	    position: absolute;
+		top: 70px; width: 100%;
+		padding: 5px;
+        font-size: 40px;
+        color: azure;
+	}
+</style>
+
+</head>
+
+<body>
+    <div id="marcadores">Intercambio de paquetes</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../jsm/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from '../jsm/controls/OrbitControls.js';
+
+        var start = false;
+        var resultado = "Hola";
+        var stepX = 0.15;
+        var stepY = 0.3;
+        var contador = 0;
+        const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
+        const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
+    
+        init();
+    
+    
+        function init() {
+            // ESCENA
+            var scene = new THREE.Scene();
+            var sceneWidth = window.innerWidth;
+            var sceneHeight = window.innerHeight;
+            scene.background = new THREE.Color(0x2a3b4c);
+
+            // CAMARA
+            var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
+            camera.up.set( 0, 0, 1 );
+			camera.position.set( 0, -50, 35 );         
+			scene.add( camera );
+
+            // OBJETOS
+            var floor = getFloor();
+            var box = getBox();
+            box.position.y = 10;
+
+            var box1 = getBox();
+            box1.position.x = 10;
+            box1.position.y = -10;
+
+            var box2 = getBox();
+            box2.position.x = -10;
+            box2.position.y = -10;
+
+            var sphere = getSphere();
+            sphere.position.y = -10;
+            sphere.position.x = -10;
+
+            scene.add(floor);
+            scene.add(box);
+            scene.add(box1);
+            scene.add(box2);
+            scene.add(sphere);
+
+            // RENDERIZADO
+            var renderer = new THREE.WebGLRenderer({
+                antialias : true
+            });
+            renderer.setSize(sceneWidth, sceneHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // CONTROLES CAMARA
+            const controls = new OrbitControls( camera, renderer.domElement );
+            controls.minDistance = 1;
+            controls.maxDistance = 60;
+            controls.maxPolarAngle = Math.PI/2;
+			controls.target.set( 0, 1.2, 2 );
+			controls.update();
+            window.addEventListener( 'resize', onWindowResize );
+
+            // ANIMACIÓN
+            animate(sphere, renderer, scene, camera);
+
+            // INTERACCIÓN
+            document.onkeydown = function (ev) {
+                switch (ev.keyCode) {
+                    case 32:
+                        start = true;
+                        resultado = "Inicio";      
+                        document.getElementById("marcadores").innerHTML = resultado;
+                        break;
+                    default:
+                        console.log("Tecla no contemplada.");
+                        break;
+                    }
+            }
+        }
+
+        function animate(sphere, renderer, scene, camera) {
+
+            if (start) { // Secuencia intercambio paquetes
+                resultado = ("Empezamos...");
+                document.getElementById("marcadores").innerHTML = resultado;
+
+                if (sphere.position.y > 10){ // Proxy
+                    sphere.position.x = 0;
+                    sphere.position.y = 10;
+                    if (contador == 2 || contador == 3){
+                        stepX = 0.15;
+                        stepY = -0.3;
+                        console.log ("Proxy-Server");
+                    }else{
+                        stepX = -0.15;
+                        stepY = -0.3;
+                        console.log ("Proxy-Cliente");
+                    }
+                    contador += 1;
+                }
+
+                if (sphere.position.y < -10 & sphere.position.x < -5){ // Cliente
+                    if (contador == 2){
+                        sphere.position.x = 10;
+                        sphere.position.y = -10;
+                        stepX = -0.15;
+                        stepY = 0.3;
+                        console.log ("Servidor-Proxy");
+                    }else{
+                        sphere.position.x = -10;
+                        sphere.position.y = -10;
+                        stepX = 0.15;
+                        stepY = 0.3;
+                        console.log ("Cliente-Proxy");
+                    }
+                }
+
+                if (sphere.position.y < -10 & sphere.position.x > 5){ // Servidor
+                        if (contador == 4) {
+                        stepX = -0.15;
+                        stepY = 0.3;
+                        sphere.position.x = 10;
+                        sphere.position.y = -10;
+                        console.log ("2222"); 
+                        } else {
+                        stepX = 0.15;
+                        stepY = 0.3;
+                        sphere.position.x = -10;
+                        sphere.position.y = -10;
+                        console.log ("1111");  
+                        }
+                        
+                }
+
+                sphere.position.x += stepX;
+                sphere.position.y += stepY;
+            }
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(function() {
+               animate(sphere, renderer, scene, camera);
+            });
+        }
+
+        function getFloor() {
+            var geometry = new THREE.PlaneGeometry(40, 40);
+            var material = new THREE.MeshBasicMaterial( { map: suelo });
+            material.map.wrapS = THREE.RepeatWrapping;
+            material.map.wrapT = THREE.RepeatWrapping;
+            material.map.anisotropy = 4;
+            material.map.repeat.set( 4, 4);
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
+        function getBox() {
+            var geometry = new THREE.BoxGeometry(3, 2, 4);
+            var material = new THREE.MeshBasicMaterial( { map: texture } );
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 2
+            return mesh;
+        }
+
+        function getSphere() {
+            var geometry = new THREE.SphereGeometry(0.5, 20, 20);
+            var material = new THREE.MeshNormalMaterial();
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 0.5;
+            mesh.castShadow = true;
+            mesh.name = "sphere";
+            return mesh;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            animate();
+        }
+
+    </script>
+</body>
+
+</html>
