@@ -86,6 +86,15 @@
             renderer.setSize(sceneWidth, sceneHeight);
             document.body.appendChild(renderer.domElement);
 
+            // Titulo Objetos
+            //const map = new THREE.TextureLoader().load("textures/cliente.png");
+            //const material = new THREE.SpriteMaterial( { map: map } );
+
+            //const sprite = new THREE.Sprite( material );
+            //sprite.position.set(-10,-10,5);
+            //sprite.scale.set(4,2,1.0);
+            //scene.add( sprite );
+
             // CONTROLES CAMARA
             const controls = new OrbitControls( camera, renderer.domElement );
             controls.minDistance = 1;
