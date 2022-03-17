@@ -33,9 +33,9 @@
         import { OrbitControls } from '../jsm/controls/OrbitControls.js';
 
         var start = false;
-        var resultado = "hola";
-        var stepX = 0.1;
-        var stepY = 0.2;
+        var resultado = "Hola";
+        var stepX = 0.15;
+        var stepY = 0.3;
         var contador = 0;
         const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
         const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
@@ -48,7 +48,7 @@
             var scene = new THREE.Scene();
             var sceneWidth = window.innerWidth;
             var sceneHeight = window.innerHeight;
-            scene.background = new THREE.Color(0x5E7E9F);
+            scene.background = new THREE.Color(0x2a3b4c);
 
             // CAMARA
             var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
@@ -87,32 +87,13 @@
             document.body.appendChild(renderer.domElement);
 
             // Titulo Objetos
-            var spritey_cliente = makeTextSprite( " CLIENTE", 
-                { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_cliente.position.set(-10,-10,5);
-            spritey_cliente.scale.set(4,2,1.0);
+            //const map = new THREE.TextureLoader().load("textures/cliente.png");
+            //const material = new THREE.SpriteMaterial( { map: map } );
 
-            var spritey_proxy = makeTextSprite( " PROXY", 
-                { fontsize: 70, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_proxy.position.set(0,10,5);
-            spritey_proxy.scale.set(4,2,1.0);
-
-            var spritey_servidor = makeTextSprite( "SERVIDOR", 
-                { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_servidor.position.set(10,-10,5);
-            spritey_servidor.scale.set(4,2,1.0);
-
-            var spritey_sphere = makeTextSprite( resultado, 
-                { fontsize: 120, textColor: {r:0, g:0, b:0, a:1.0}} );
-            
-            spritey_sphere.position.set(-1000, -10, 2);
-            spritey_sphere.scale.set(4, 2, 1.0);
-            scene.add(spritey_sphere);
-
-
-            scene.add(spritey_cliente);
-            scene.add(spritey_proxy);
-            scene.add(spritey_servidor);
+            //const sprite = new THREE.Sprite( material );
+            //sprite.position.set(-10,-10,5);
+            //sprite.scale.set(4,2,1.0);
+            //scene.add( sprite );
 
             // CONTROLES CAMARA
             const controls = new OrbitControls( camera, renderer.domElement );
@@ -124,7 +105,7 @@
             window.addEventListener( 'resize', onWindowResize );
 
             // ANIMACIÓN
-            animate(sphere, spritey_sphere, renderer, scene, camera);
+            animate(sphere, renderer, scene, camera);
 
             // INTERACCIÓN
             document.onkeydown = function (ev) {
@@ -141,7 +122,7 @@
             }
         }
 
-        function animate(sphere, spritey_sphere, renderer, scene, camera) {
+        function animate(sphere, renderer, scene, camera) {
 
             if (start) { // Secuencia intercambio paquetes
                 document.getElementById("marcadores").innerHTML = resultado;
@@ -150,8 +131,8 @@
                     if (contador == 0 || contador == 2 || contador == 10 || contador == 19){
                         sphere.position.x = 0;
                         sphere.position.y = 10;
-                        stepX = -0.1;
-                        stepY = -0.2;
+                        stepX = -0.15;
+                        stepY = -0.3;
                         switch (contador) {
                             case 0:
                                 resultado = ("401 Unauthorized");
@@ -169,8 +150,8 @@
                     }else if (contador == 4 || contador == 6 || contador == 14 || contador == 17) {
                         sphere.position.x = 0;
                         sphere.position.y = 10;
-                        stepX = 0.1;
-                        stepY = -0.2;
+                        stepX = 0.15;
+                        stepY = -0.3;
                         switch (contador) {
                             case 4:
                                 resultado = ("200 OK");
@@ -190,8 +171,8 @@
                     }else if (contador == 8 || contador == 9) {
                         sphere.position.x = 10;
                         sphere.position.y = -10;
-                        stepX = -0.1;
-                        stepY = 0.2;
+                        stepX = -0.15;
+                        stepY = 0.3;
                         if (contador == 8) {
                             resultado = ("180 Ringning");
                         }else{
@@ -205,15 +186,15 @@
                     if (contador == 3){
                         sphere.position.x = 10;
                         sphere.position.y = -10;
-                        stepX = -0.1;
-                        stepY = 0.2;
+                        stepX = -0.15;
+                        stepY = 0.3;
                         resultado = ("Register Server");
                         
                     }else if (contador == 11 || contador == 12) {
                         sphere.position.x = 0;
                         sphere.position.y = 10;
-                        stepX = -0.1;
-                        stepY = -0.2;
+                        stepX = -0.15;
+                        stepY = -0.3;
                         if (contador == 11) {
                             resultado = ("180 Ringning");
                         }else{
@@ -227,22 +208,23 @@
                     }else{
                         sphere.position.x = -10;
                         sphere.position.y = -10;
-                        stepX = 0.1;
-                        stepY = 0.2;
+                        stepX = 0.15;
+                        stepY = 0.3;
                         
                         if (contador == 1) {
                             resultado = ("Register");
                         }else if (contador == 13) {
                             resultado = ("ACK Cliente-Proxy");
                         }
+                        console.log ("Cliente-Proxy");
                     }
                     contador += 1;
                 }
 
                 if (sphere.position.y < -10 & sphere.position.x > 5){ // Servidor
                     if (contador == 7 || contador == 18) { // Servidor-Proxy
-                        stepX = -0.1;
-                        stepY = 0.2;
+                        stepX = -0.15;
+                        stepY = 0.3;
                         sphere.position.x = 10;
                         sphere.position.y = -10;
                         if (contador == 7) {
@@ -252,8 +234,8 @@
                         }
 
                     } else if (contador == 5) { // Cliente-Servidor
-                        stepX = 0.1;
-                        stepY = 0.2;
+                        stepX = 0.15;
+                        stepY = 0.3;
                         sphere.position.x = -10;
                         sphere.position.y = -10;
                         resultado = ("INVITE + SDP -> Cliente - Proxy");
@@ -261,7 +243,7 @@
                     } else if (contador == 15) {
                         sphere.position.x =  10;
                         sphere.position.y = -10;
-                        stepX = -0.05;
+                        stepX = -0.015;
                         stepY = 0;
                         resultado = ("RTP");    
                     }
@@ -279,21 +261,16 @@
 
                 sphere.position.x += stepX;
                 sphere.position.y += stepY;
-
-                //spritey_sphere = makeTextSprite(resultado);
-                //scene.add(spritey_sphere);
-                spritey_sphere.position.x = sphere.position.x;
-                spritey_sphere.position.y = sphere.position.y;
             }
 
             renderer.render(scene, camera);
             requestAnimationFrame(function() {
-               animate(sphere, spritey_sphere, renderer, scene, camera);
+               animate(sphere, renderer, scene, camera);
             });
         }
 
         function getFloor() {
-            var geometry = new THREE.PlaneGeometry(60, 60);
+            var geometry = new THREE.PlaneGeometry(40, 40);
             var material = new THREE.MeshBasicMaterial( { map: suelo });
             material.map.wrapS = THREE.RepeatWrapping;
             material.map.wrapT = THREE.RepeatWrapping;
@@ -326,34 +303,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize( window.innerWidth, window.innerHeight );
             animate();
-        }
-
-        function makeTextSprite( message, parameters ){
-            if ( parameters === undefined ) parameters = {};
-            var fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Courier New";
-            var fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 18;
-            var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 4;
-            var borderColor = parameters.hasOwnProperty("borderColor") ?parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
-            var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?parameters["backgroundColor"] : { r:0, g:0, b:255, a:1.0 };
-            var textColor = parameters.hasOwnProperty("textColor") ?parameters["textColor"] : { r:0, g:0, b:0, a:1.0 };
-
-            var canvas = document.createElement('canvas');
-            var context = canvas.getContext('2d');
-            context.font = "Bold " + fontsize + "px " + fontface;
-            var metrics = context.measureText( message );
-            var textWidth = metrics.width;
-
-            context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," + backgroundColor.b + "," + backgroundColor.a + ")";
-            context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," + borderColor.b + "," + borderColor.a + ")";
-            context.fillStyle = "rgba("+textColor.r+", "+textColor.g+", "+textColor.b+", 1.0)";
-            context.fillText( message, borderThickness, fontsize + borderThickness);
-
-            var texture = new THREE.Texture(canvas) 
-            texture.needsUpdate = true;
-            var spriteMaterial = new THREE.SpriteMaterial( { map: texture} );
-            var sprite = new THREE.Sprite( spriteMaterial );
-            //sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
-            return sprite;  
         }
 
     </script>
