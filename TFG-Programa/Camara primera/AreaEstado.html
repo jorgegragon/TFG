@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Three.js: ESCENA 3D</title>
+<style>
+    #marcadores {
+	    position: absolute;
+        text-align: center;
+		top: 70px; width: 100%;
+		padding: 5px;
+        font-size: 40px;
+        color: azure;
+	}
+</style>
+
+</head>
+
+<body>
+    <div id="marcadores">Intercambio de paquetes</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../jsm/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from '../jsm/controls/OrbitControls.js';
+
+        import { Capsule } from '../jsm/math/Capsule.js';
+
+        var start = false;
+        var resultado = "hola";
+        var VelCamara = 0.5;
+        var stepX = 0.1;
+        var stepY = 0.2;
+        var contador = 0;
+        const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
+        const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
+
+        const clock = new THREE.Clock();
+        const playerVelocity = new THREE.Vector3();
+        const playerDirection = new THREE.Vector3();
+        let playerOnFloor = false;
+        const keyStates = {};
+        let mouseTime = 0;
+        const GRAVITY = 30;
+        const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35 );
+
+        const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    
+        init();
+    
+    
+        function init() {
+            // ESCENA
+            var scene = new THREE.Scene();
+            var sceneWidth = window.innerWidth;
+            var sceneHeight = window.innerHeight;
+            scene.background = new THREE.Color(0x5E7E9F);
+
+            // CAMARA
+            camera.position.set( 0, -50, 60 );
+			camera.rotation.order = 'YXZ';
+
+            // OBJETOS
+            var floor = getFloor();
+            var box = getBox();
+            box.position.y = 10;
+
+            var box1 = getBox();
+            box1.position.x = 10;
+            box1.position.y = -10;
+
+            var box2 = getBox();
+            box2.position.x = -10;
+            box2.position.y = -10;
+
+            var sphere = getSphere();
+            sphere.position.y = -10;
+            sphere.position.x = -10;
+
+            scene.add(floor);
+            scene.add(box);
+            scene.add(box1);
+            scene.add(box2);
+            scene.add(sphere);
+
+            // RENDERIZADO
+            var renderer = new THREE.WebGLRenderer({
+                antialias : true
+            });
+            renderer.setSize(sceneWidth, sceneHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // CONTROLES CAMARA
+            document.addEventListener( 'keydown', ( event ) => {
+
+                keyStates[ event.code ] = true;
+
+            } );
+
+            document.addEventListener( 'keyup', ( event ) => {
+
+                keyStates[ event.code ] = false;
+
+            } );
+
+            document.addEventListener( 'mousedown', () => {
+
+                document.body.requestPointerLock();
+
+                mouseTime = performance.now();
+
+            } );
+
+            document.body.addEventListener( 'mousemove', ( event ) => {
+
+                if ( document.pointerLockElement === document.body ) {
+
+                    camera.rotation.y -= event.movementX / 500;
+                    camera.rotation.x -= event.movementY / 500;
+
+                }
+
+            } );
+
+            // ANIMACIÓN
+            animate(sphere, renderer, scene, camera);
+        }
+
+        function animate(sphere, renderer, scene, camera) {
+
+           
+            const deltaTime = Math.min( 0.05, clock.getDelta() ) / 5;
+            controls( deltaTime );
+            updatePlayer( deltaTime );
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(function() {
+               animate(sphere, renderer, scene, camera);
+            });
+        }
+
+        function getFloor() {
+            var geometry = new THREE.PlaneGeometry(60, 60);
+            var material = new THREE.MeshBasicMaterial( { map: suelo });
+            material.map.wrapS = THREE.RepeatWrapping;
+            material.map.wrapT = THREE.RepeatWrapping;
+            material.map.anisotropy = 4;
+            material.map.repeat.set( 4, 4);
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
+        function getBox() {
+            var geometry = new THREE.BoxGeometry(3, 2, 4);
+            var material = new THREE.MeshBasicMaterial( { map: texture } );
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 2
+            return mesh;
+        }
+
+        function getSphere() {
+            var geometry = new THREE.SphereGeometry(0.5, 20, 20);
+            var material = new THREE.MeshNormalMaterial();
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 0.5;
+            mesh.castShadow = true;
+            mesh.name = "sphere";
+            return mesh;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            animate();
+        }
+
+        function controls( deltaTime ) {
+
+        // gives a bit of air control
+            const speedDelta = deltaTime * ( playerOnFloor ? 25 : 8 );
+            
+
+            if ( keyStates[ 'KeyW' ] ) {
+
+                playerVelocity.add( getForwardVector().multiplyScalar( speedDelta ) );
+                camera.position.y += speedDelta;
+                console.log("entra");
+
+            }
+
+            if ( keyStates[ 'KeyS' ] ) {
+
+                playerVelocity.add( getForwardVector().multiplyScalar( - speedDelta ) );
+
+            }
+
+            if ( keyStates[ 'KeyA' ] ) {
+
+                playerVelocity.add( getSideVector().multiplyScalar( - speedDelta ) );
+
+            }
+
+            if ( keyStates[ 'KeyD' ] ) {
+
+                playerVelocity.add( getSideVector().multiplyScalar( speedDelta ) );
+
+            }
+
+            if ( playerOnFloor ) {
+
+                if ( keyStates[ 'Space' ] ) {
+
+                    playerVelocity.y = 15;
+
+                }
+
+            }
+
+        }
+
+        function getForwardVector() {
+
+            camera.getWorldDirection( playerDirection );
+            playerDirection.y = 0;
+            playerDirection.normalize();
+
+            return playerDirection;
+
+        }
+
+        function getSideVector() {
+
+            camera.getWorldDirection( playerDirection );
+            playerDirection.y = 0;
+            playerDirection.normalize();
+            playerDirection.cross( camera.up );
+
+            return playerDirection;
+
+        }
+
+        function updatePlayer( deltaTime ) {
+
+            let damping = Math.exp( - 4 * deltaTime ) - 1;
+
+            if ( ! playerOnFloor ) {
+
+                playerVelocity.y -= GRAVITY * deltaTime;
+
+                // small air resistance
+                damping *= 0.1;
+
+            }
+
+            playerVelocity.addScaledVector( playerVelocity, damping );
+
+            const deltaPosition = playerVelocity.clone().multiplyScalar( deltaTime );
+            playerCollider.translate( deltaPosition );
+
+            
+
+            camera.position.copy( playerCollider.end );
+
+        }
+
+    </script>
+</body>
+
+</html>

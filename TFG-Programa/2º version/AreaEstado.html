@@ -34,6 +34,7 @@
 
         var start = false;
         var resultado = "hola";
+        var VelCamara = 0.5;
         var stepX = 0.1;
         var stepY = 0.2;
         var contador = 0;
@@ -102,14 +103,6 @@
             spritey_servidor.position.set(10,-10,5);
             spritey_servidor.scale.set(4,2,1.0);
 
-            var spritey_sphere = makeTextSprite( resultado, 
-                { fontsize: 120, textColor: {r:0, g:0, b:0, a:1.0}} );
-            
-            spritey_sphere.position.set(-1000, -10, 2);
-            spritey_sphere.scale.set(4, 2, 1.0);
-            scene.add(spritey_sphere);
-
-
             scene.add(spritey_cliente);
             scene.add(spritey_proxy);
             scene.add(spritey_servidor);
@@ -124,15 +117,29 @@
             window.addEventListener( 'resize', onWindowResize );
 
             // ANIMACIÓN
-            animate(sphere, spritey_sphere, renderer, scene, camera);
+            animate(sphere, renderer, scene, camera);
 
             // INTERACCIÓN
             document.onkeydown = function (ev) {
                 switch (ev.keyCode) {
-                    case 32:
+                    case 32: // Espacio
                         start = true;
                         resultado = "Register";      
                         document.getElementById("marcadores").innerHTML = resultado;
+                        break;
+                    case 87: // W
+                        camera.position.y += VelCamara;
+                        camera.position.z -= VelCamara;
+                        break;
+                    case 83: // S
+                        camera.position.y -= VelCamara;
+                        camera.position.z += VelCamara;
+                        break;
+                    case 65: // A
+                        camera.position.x -= VelCamara;
+                        break;
+                    case 68: // D
+                        camera.position.x += VelCamara;
                         break;
                     default:
                         console.log("Tecla no contemplada.");
@@ -141,7 +148,7 @@
             }
         }
 
-        function animate(sphere, spritey_sphere, renderer, scene, camera) {
+        function animate(sphere, renderer, scene, camera) {
 
             if (start) { // Secuencia intercambio paquetes
                 document.getElementById("marcadores").innerHTML = resultado;
@@ -279,16 +286,11 @@
 
                 sphere.position.x += stepX;
                 sphere.position.y += stepY;
-
-                //spritey_sphere = makeTextSprite(resultado);
-                //scene.add(spritey_sphere);
-                spritey_sphere.position.x = sphere.position.x;
-                spritey_sphere.position.y = sphere.position.y;
             }
 
             renderer.render(scene, camera);
             requestAnimationFrame(function() {
-               animate(sphere, spritey_sphere, renderer, scene, camera);
+               animate(sphere, renderer, scene, camera);
             });
         }
 
