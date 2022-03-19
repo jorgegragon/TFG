@@ -46,12 +46,12 @@
         const clock = new THREE.Clock();
         const playerVelocity = new THREE.Vector3();
         const playerDirection = new THREE.Vector3();
-        let playerOnFloor = false;
+        let playerOnFloor = true;
         const keyStates = {};
         let mouseTime = 0;
-        const GRAVITY = 30;
-        const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35 );
-
+        //const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35 );
+        const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 3, 30), 0.35 );
+        
         const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 1000 );
     
         init();
@@ -65,21 +65,26 @@
             scene.background = new THREE.Color(0x5E7E9F);
 
             // CAMARA
-            camera.position.set( 0, -50, 60 );
+            //camera.position.set( 0, -50, 60 );
 			camera.rotation.order = 'YXZ';
 
             // OBJETOS
             var floor = getFloor();
+            //floor.rotateY( Math.PI / 4 );
+            floor.rotateX( Math.PI / -2 );
+			//floor.translate( 0, 0, -5 );
+
             var box = getBox();
-            box.position.y = 10;
+            box.position.set (0, 2, -15);
+            box.rotateX (Math.PI / 2);
 
             var box1 = getBox();
-            box1.position.x = 10;
-            box1.position.y = -10;
+            box1.position.set (-15, 2, 15);
+            box1.rotateX (Math.PI / 2);
 
             var box2 = getBox();
-            box2.position.x = -10;
-            box2.position.y = -10;
+            box2.position.set (15, 2, 15);
+            box2.rotateX (Math.PI / 2);
 
             var sphere = getSphere();
             sphere.position.y = -10;
@@ -137,7 +142,7 @@
         function animate(sphere, renderer, scene, camera) {
 
            
-            const deltaTime = Math.min( 0.05, clock.getDelta() ) / 5;
+            const deltaTime = Math.min( 0.05, clock.getDelta() ) * 4;
             controls( deltaTime );
             updatePlayer( deltaTime );
 
@@ -148,7 +153,7 @@
         }
 
         function getFloor() {
-            var geometry = new THREE.PlaneGeometry(60, 60);
+            var geometry = new THREE.PlaneGeometry(100, 100);
             var material = new THREE.MeshBasicMaterial( { map: suelo });
             material.map.wrapS = THREE.RepeatWrapping;
             material.map.wrapT = THREE.RepeatWrapping;
@@ -192,8 +197,6 @@
             if ( keyStates[ 'KeyW' ] ) {
 
                 playerVelocity.add( getForwardVector().multiplyScalar( speedDelta ) );
-                camera.position.y += speedDelta;
-                console.log("entra");
 
             }
 
@@ -215,11 +218,24 @@
 
             }
 
+            if ( keyStates[ 'Space' ] ) {
+
+                null;
+
+            }
+
             if ( playerOnFloor ) {
 
-                if ( keyStates[ 'Space' ] ) {
+                if ( keyStates[ 'KeyQ' ] ) {
 
-                    playerVelocity.y = 15;
+                    playerVelocity.y = 5;
+
+                }
+                if ( keyStates[ 'KeyE' ] ) {
+                    if (camera.position.y > 3){
+                        playerVelocity.y = -5;
+                    }
+                    
 
                 }
 
@@ -254,8 +270,7 @@
 
             if ( ! playerOnFloor ) {
 
-                playerVelocity.y -= GRAVITY * deltaTime;
-
+                playerVelocity.y = 0;
                 // small air resistance
                 damping *= 0.1;
 
@@ -265,8 +280,6 @@
 
             const deltaPosition = playerVelocity.clone().multiplyScalar( deltaTime );
             playerCollider.translate( deltaPosition );
-
-            
 
             camera.position.copy( playerCollider.end );
 

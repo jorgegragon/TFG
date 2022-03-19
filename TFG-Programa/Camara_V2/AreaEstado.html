@@ -54,7 +54,7 @@
             // CAMARA
             var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
             camera.up.set( 0, 0, 1 );
-			camera.position.set( 0, -50, 35 );         
+			camera.position.set( 0, -30, 0 );         
 			scene.add( camera );
 
             // OBJETOS
@@ -129,11 +129,9 @@
                         break;
                     case 87: // W
                         camera.position.y += VelCamara;
-                        camera.position.z -= VelCamara;
                         break;
                     case 83: // S
                         camera.position.y -= VelCamara;
-                        camera.position.z += VelCamara;
                         break;
                     case 65: // A
                         camera.position.x -= VelCamara;
