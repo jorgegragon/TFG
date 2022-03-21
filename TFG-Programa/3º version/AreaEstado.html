@@ -10,7 +10,7 @@
 		top: 70px; width: 100%;
 		padding: 5px;
         font-size: 40px;
-        color: azure;
+        color: black;
 	}
 </style>
 
@@ -32,15 +32,28 @@
 
         import { OrbitControls } from '../jsm/controls/OrbitControls.js';
 
+        import { Capsule } from '../jsm/math/Capsule.js';
+
         var start = false;
         var resultado = "hola";
         var VelCamara = 0.5;
         var stepX = 0.1;
-        var stepY = 0.2;
+        var stepZ = -0.2;
         var contador = 0;
         const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
         const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
+        const pared = new THREE.TextureLoader().load( 'textures/secuencia.png' );
     
+        // CAMARA
+        const clock = new THREE.Clock();
+        const playerVelocity = new THREE.Vector3();
+        const playerDirection = new THREE.Vector3();
+        const keyStates = {};
+        let mouseTime = 0;
+        const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 30, 100), 0.35 );//( 0, 3, 30)        
+        const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    
+
         init();
     
     
@@ -52,27 +65,44 @@
             scene.background = new THREE.Color(0x5E7E9F);
 
             // CAMARA
-            var camera = new THREE.PerspectiveCamera(45, sceneWidth / sceneHeight, 0.01, 100);
-            camera.up.set( 0, 0, 1 );
-			camera.position.set( 0, -50, 35 );         
-			scene.add( camera );
+            camera.rotation.order = 'YXZ';
 
             // OBJETOS
             var floor = getFloor();
+            floor.rotateX( Math.PI / -2 );
+            // Pared
+            var nueva = pared;
+            var wall1 = getWall(nueva);
+            var nueva = suelo;
+            wall1.position.set( -37.5, 12.5, -50);
+            var wall2 = getWall(nueva);
+            
+            wall2.position.set( -12.5, 12.5, -50);
+            var wall3 = getWall(nueva);
+            
+            wall3.position.set( 12.5, 12.5, -50);
+            
+            var wall4 = getWall(nueva);
+            wall4.position.set( 37.5, 12.5, -50);
+            scene.add(wall1);
+            scene.add(wall2);
+            scene.add(wall3);
+            scene.add(wall4);
+            //
             var box = getBox();
-            box.position.y = 10;
+            box.position.set (0, 2, -15);
+            box.rotateX (Math.PI / 2);
 
             var box1 = getBox();
-            box1.position.x = 10;
-            box1.position.y = -10;
+            box1.position.set (-15, 2, 15);
+            box1.rotateX (Math.PI / 2);
 
             var box2 = getBox();
-            box2.position.x = -10;
-            box2.position.y = -10;
+            box2.position.set (15, 2, 15);
+            box2.rotateX (Math.PI / 2);
 
             var sphere = getSphere();
-            sphere.position.y = -10;
-            sphere.position.x = -10;
+            sphere.position.set (-15, 2, 15);
 
             scene.add(floor);
             scene.add(box);
@@ -90,17 +120,17 @@
             // Titulo Objetos
             var spritey_cliente = makeTextSprite( " CLIENTE", 
                 { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_cliente.position.set(-10,-10,5);
+            spritey_cliente.position.set(-14.8, 5, 15);
             spritey_cliente.scale.set(4,2,1.0);
 
             var spritey_proxy = makeTextSprite( " PROXY", 
                 { fontsize: 70, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_proxy.position.set(0,10,5);
+            spritey_proxy.position.set(0, 5, -15);;
             spritey_proxy.scale.set(4,2,1.0);
 
             var spritey_servidor = makeTextSprite( "SERVIDOR", 
                 { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_servidor.position.set(10,-10,5);
+            spritey_servidor.position.set(15, 5, 15);;
             spritey_servidor.scale.set(4,2,1.0);
 
             scene.add(spritey_cliente);
@@ -108,44 +138,40 @@
             scene.add(spritey_servidor);
 
             // CONTROLES CAMARA
-            const controls = new OrbitControls( camera, renderer.domElement );
-            controls.minDistance = 1;
-            controls.maxDistance = 60;
-            controls.maxPolarAngle = Math.PI/2;
-			controls.target.set( 0, 1.2, 2 );
-			controls.update();
-            window.addEventListener( 'resize', onWindowResize );
+            document.addEventListener( 'keydown', ( event ) => {
+
+                keyStates[ event.code ] = true;
+
+            } );
+
+            document.addEventListener( 'keyup', ( event ) => {
+
+                keyStates[ event.code ] = false;
+
+            } );
+
+            document.addEventListener( 'mousedown', () => {
+
+                document.body.requestPointerLock();
+
+                mouseTime = performance.now();
+
+            } );
+
+            document.body.addEventListener( 'mousemove', ( event ) => {
+
+                if ( document.pointerLockElement === document.body ) {
+
+                        camera.rotation.y -= event.movementX / 500;
+                        camera.rotation.x -= event.movementY / 500;
+
+                }
+
+            } );
 
             // ANIMACIÓN
             animate(sphere, renderer, scene, camera);
 
-            // INTERACCIÓN
-            document.onkeydown = function (ev) {
-                switch (ev.keyCode) {
-                    case 32: // Espacio
-                        start = true;
-                        resultado = "Register";      
-                        document.getElementById("marcadores").innerHTML = resultado;
-                        break;
-                    case 87: // W
-                        camera.position.y += VelCamara;
-                        camera.position.z -= VelCamara;
-                        break;
-                    case 83: // S
-                        camera.position.y -= VelCamara;
-                        camera.position.z += VelCamara;
-                        break;
-                    case 65: // A
-                        camera.position.x -= VelCamara;
-                        break;
-                    case 68: // D
-                        camera.position.x += VelCamara;
-                        break;
-                    default:
-                        console.log("Tecla no contemplada.");
-                        break;
-                    }
-            }
         }
 
         function animate(sphere, renderer, scene, camera) {
@@ -153,52 +179,59 @@
             if (start) { // Secuencia intercambio paquetes
                 document.getElementById("marcadores").innerHTML = resultado;
 
-                if (sphere.position.y > 10){ // Proxy
+                if (sphere.position.z < -15){ // Proxy
                     if (contador == 0 || contador == 2 || contador == 10 || contador == 19){
-                        sphere.position.x = 0;
-                        sphere.position.y = 10;
+                        sphere.position.set (0, 2, -15);
                         stepX = -0.1;
-                        stepY = -0.2;
+                        stepZ = 0.2;
                         switch (contador) {
                             case 0:
                                 resultado = ("401 Unauthorized");
+                                sphere.material.color = new THREE.Color("red");
                                 break;
                             case 2 || 19:
-                                resultado = ("200 OK");   
+                                resultado = ("200 OK");
+                                if (contador == 19) {
+                                    sphere.material.color = new THREE.Color("maroon");
+                                }   
                                 break;
                             case 10:
                                 resultado = ("100 Trying");
+                                sphere.material.color = new THREE.Color("green");
                                 break;
                             default:
                                 break;
                         }
                         
                     }else if (contador == 4 || contador == 6 || contador == 14 || contador == 17) {
-                        sphere.position.x = 0;
-                        sphere.position.y = 10;
+                        sphere.position.set (0, 2, -15);
                         stepX = 0.1;
-                        stepY = -0.2;
+                        stepZ = 0.2;
                         switch (contador) {
                             case 4:
                                 resultado = ("200 OK");
+                                sphere.material.color = new THREE.Color("red");
                                 break;
                             case 6:
-                                resultado = ("INVITE + SDP -> Proxy-Server");   
+                                resultado = ("INVITE + SDP -> Proxy-Server");
+                                sphere.material.color = new THREE.Color("green");   
                                 break;
                             case 14:
                                 resultado = ("ACK Proxy-Server");
+                                sphere.material.color = new THREE.Color("green");
                                 break;
                             case 17:
                                 resultado = ("BYE");
+                                sphere.material.color = new THREE.Color("maroon");
                                 break;
                             default:
                                 break;
                         }
                     }else if (contador == 8 || contador == 9) {
-                        sphere.position.x = 10;
-                        sphere.position.y = -10;
+                        sphere.position.set (15, 2, 15);
                         stepX = -0.1;
-                        stepY = 0.2;
+                        stepZ = -0.2;
+                        sphere.material.color = new THREE.Color("green");
                         if (contador == 8) {
                             resultado = ("180 Ringning");
                         }else{
@@ -208,85 +241,94 @@
                     contador += 1;
                 }
 
-                if (sphere.position.y < -10 & sphere.position.x < -5){ // Cliente
+                if (sphere.position.z > 15 & sphere.position.x < -5){ // Cliente
                     if (contador == 3){
-                        sphere.position.x = 10;
-                        sphere.position.y = -10;
+                        sphere.position.set (15, 2, 15);
                         stepX = -0.1;
-                        stepY = 0.2;
+                        stepZ = -0.2;
                         resultado = ("Register Server");
+                        sphere.material.color = new THREE.Color("red");
                         
                     }else if (contador == 11 || contador == 12) {
-                        sphere.position.x = 0;
-                        sphere.position.y = 10;
+                        sphere.position.set (0, 2, -15);
                         stepX = -0.1;
-                        stepY = -0.2;
+                        stepZ = 0.2;
                         if (contador == 11) {
                             resultado = ("180 Ringning");
                         }else{
                             resultado = ("200 OK + SDP");
                         }
+                        sphere.material.color = new THREE.Color("green");
+
                     }else if (contador == 20) {
                         contador = 0;
                         start = false;
                         resultado = ("Intercambio de paquetes");
                         document.getElementById("marcadores").innerHTML = resultado;
+                        sphere.material.color = new THREE.Color("red");
+
                     }else{
-                        sphere.position.x = -10;
-                        sphere.position.y = -10;
+                        sphere.position.set (-15, 2, 15);
                         stepX = 0.1;
-                        stepY = 0.2;
+                        stepZ = -0.2;
                         
                         if (contador == 1) {
                             resultado = ("Register");
+                            sphere.material.color = new THREE.Color("red");
                         }else if (contador == 13) {
                             resultado = ("ACK Cliente-Proxy");
+                            sphere.material.color = new THREE.Color("green");
                         }
                     }
                     contador += 1;
                 }
 
-                if (sphere.position.y < -10 & sphere.position.x > 5){ // Servidor
+                if (sphere.position.z > 15 & sphere.position.x > 5){ // Servidor
                     if (contador == 7 || contador == 18) { // Servidor-Proxy
                         stepX = -0.1;
-                        stepY = 0.2;
-                        sphere.position.x = 10;
-                        sphere.position.y = -10;
+                        stepZ = -0.2;
+                        sphere.position.set (15, 2, 15);
                         if (contador == 7) {
                             resultado = ("100 Trying");
+                            sphere.material.color = new THREE.Color("green");
                         }else{
                             resultado = ("200 OK");
+                            sphere.material.color = new THREE.Color("maroon");
                         }
 
                     } else if (contador == 5) { // Cliente-Servidor
                         stepX = 0.1;
-                        stepY = 0.2;
-                        sphere.position.x = -10;
-                        sphere.position.y = -10;
+                        stepZ = -0.2;
+                        sphere.position.set (-15, 2, 15);
                         resultado = ("INVITE + SDP -> Cliente - Proxy");
+                        sphere.material.color = new THREE.Color("green");
                         
                     } else if (contador == 15) {
-                        sphere.position.x =  10;
-                        sphere.position.y = -10;
+                        sphere.position.set (15, 2, 15);
                         stepX = -0.05;
-                        stepY = 0;
-                        resultado = ("RTP");    
+                        stepZ = 0;
+                        resultado = ("RTP");
+                        sphere.material.color = new THREE.Color("blue");    
                     }
                     contador += 1;    
                 }
 
-                if (sphere.position.x < -10 && contador == 16){
-                    stepX = 0.15;
-                    stepY = 0.3;
-                    sphere.position.x = -10;
-                    sphere.position.y = -10;
+                if (sphere.position.x < -15 && contador == 16){
+                    stepX = 0.1;
+                    stepZ = -0.2;
+                    sphere.position.set (-15, 2, 15);
                     resultado = ("BYE");
+                    sphere.material.color = new THREE.Color("maroon");
                     contador += 1;
                 }
-
                 sphere.position.x += stepX;
-                sphere.position.y += stepY;
+                sphere.position.z += stepZ;
             }
+
+
+            const deltaTime = Math.min( 0.05, clock.getDelta() ) * 4;
+            controls( deltaTime );
+            updatePlayer( deltaTime );
 
             renderer.render(scene, camera);
             requestAnimationFrame(function() {
@@ -295,7 +337,7 @@
         }
 
         function getFloor() {
-            var geometry = new THREE.PlaneGeometry(60, 60);
+            var geometry = new THREE.PlaneGeometry(100, 100);
             var material = new THREE.MeshBasicMaterial( { map: suelo });
             material.map.wrapS = THREE.RepeatWrapping;
             material.map.wrapT = THREE.RepeatWrapping;
@@ -304,7 +346,14 @@
             var mesh = new THREE.Mesh(geometry, material);
             return mesh;
         }
-
+///////////////////////////////////////////////////////////////////////////////////////
+        function getWall(nueva) {
+            var geometry = new THREE.PlaneGeometry(25, 25);
+            var material = new THREE.MeshBasicMaterial( { map: nueva });
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+//////////////////////////////////////////////////////////////////////////////////////////
         function getBox() {
             var geometry = new THREE.BoxGeometry(3, 2, 4);
             var material = new THREE.MeshBasicMaterial( { map: texture } );
@@ -315,7 +364,7 @@
 
         function getSphere() {
             var geometry = new THREE.SphereGeometry(0.5, 20, 20);
-            var material = new THREE.MeshNormalMaterial();
+            var material = new THREE.MeshBasicMaterial({color: "red"});
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 0.5;
             mesh.castShadow = true;
@@ -356,6 +405,92 @@
             var sprite = new THREE.Sprite( spriteMaterial );
             //sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
             return sprite;  
+        }
+
+        function controls( deltaTime ) {
+            
+            const speedDelta = deltaTime * 25;
+            
+            if ( keyStates[ 'KeyW' ] ) {
+
+                    playerVelocity.add( getForwardVector().multiplyScalar( speedDelta ) );
+                
+            }
+
+            if ( keyStates[ 'KeyS' ] ) {
+
+                playerVelocity.add( getForwardVector().multiplyScalar( - speedDelta ) );
+
+            }
+
+            if ( keyStates[ 'KeyA' ] ) {
+
+                playerVelocity.add( getSideVector().multiplyScalar( - speedDelta ) );
+
+            }
+
+            if ( keyStates[ 'KeyD' ] ) {
+
+                playerVelocity.add( getSideVector().multiplyScalar( speedDelta ) );
+
+            }
+
+            if ( keyStates[ 'Space' ] ) {
+
+                start = true;
+                resultado = "Register";      
+                document.getElementById("marcadores").innerHTML = resultado;;
+
+            }
+
+            if ( keyStates[ 'KeyQ' ] ) {
+
+                playerVelocity.y = 5;
+
+            }
+            
+            if ( keyStates[ 'KeyE' ] ) {
+                
+                if (camera.position.y > 3){
+                    playerVelocity.y = -5;
+                }
+
+            }
+
+        }
+
+        function getForwardVector() {
+
+            camera.getWorldDirection( playerDirection );
+            playerDirection.y = 0;
+            playerDirection.normalize();
+
+            return playerDirection;
+
+        }
+
+        function getSideVector() {
+
+            camera.getWorldDirection( playerDirection );
+            playerDirection.y = 0;
+            playerDirection.normalize();
+            playerDirection.cross( camera.up );
+
+            return playerDirection;
+
+        }
+
+        function updatePlayer( deltaTime ) {
+
+            let damping = Math.exp( - 4 * deltaTime ) - 1;
+
+            playerVelocity.addScaledVector( playerVelocity, damping );
+
+            const deltaPosition = playerVelocity.clone().multiplyScalar( deltaTime );
+            playerCollider.translate( deltaPosition );
+
+            camera.position.copy( playerCollider.end );
+
         }
 
     </script>

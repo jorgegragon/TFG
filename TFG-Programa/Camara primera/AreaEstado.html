@@ -46,7 +46,6 @@
         const clock = new THREE.Clock();
         const playerVelocity = new THREE.Vector3();
         const playerDirection = new THREE.Vector3();
-        let playerOnFloor = true;
         const keyStates = {};
         let mouseTime = 0;
         //const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35 );
@@ -191,7 +190,7 @@
         function controls( deltaTime ) {
 
         // gives a bit of air control
-            const speedDelta = deltaTime * ( playerOnFloor ? 25 : 8 );
+            const speedDelta = deltaTime * 25;
             
 
             if ( keyStates[ 'KeyW' ] ) {
@@ -220,23 +219,22 @@
 
             if ( keyStates[ 'Space' ] ) {
 
-                null;
+                start = true;
+                resultado = "Register";      
+                document.getElementById("marcadores").innerHTML = resultado;;
 
             }
 
-            if ( playerOnFloor ) {
+            if ( keyStates[ 'KeyQ' ] ) {
 
-                if ( keyStates[ 'KeyQ' ] ) {
+                playerVelocity.y = 5;
 
-                    playerVelocity.y = 5;
-
-                }
-                if ( keyStates[ 'KeyE' ] ) {
-                    if (camera.position.y > 3){
-                        playerVelocity.y = -5;
-                    }
-                    
-
+            }
+            
+            if ( keyStates[ 'KeyE' ] ) {
+                
+                if (camera.position.y > 3){
+                    playerVelocity.y = -5;
                 }
 
             }
@@ -267,14 +265,6 @@
         function updatePlayer( deltaTime ) {
 
             let damping = Math.exp( - 4 * deltaTime ) - 1;
-
-            if ( ! playerOnFloor ) {
-
-                playerVelocity.y = 0;
-                // small air resistance
-                damping *= 0.1;
-
-            }
 
             playerVelocity.addScaledVector( playerVelocity, damping );
 
