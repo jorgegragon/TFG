@@ -43,6 +43,9 @@
         const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
         const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
         const pared = new THREE.TextureLoader().load( 'textures/secuencia.png' );
+        const muro = new THREE.TextureLoader().load( 'textures/brick.jpg' );
+        const att_cliente = new THREE.TextureLoader().load( 'textures/att_cliente.png' );
+        const att_proxy = new THREE.TextureLoader().load( 'textures/att_proxy.png' );
     
         // CAMARA
         const clock = new THREE.Clock();
@@ -73,21 +76,44 @@
             // Pared
             var nueva = pared;
             var wall1 = getWall(nueva);
-            var nueva = suelo;
-            wall1.position.set( -37.5, 12.5, -50);
-            var wall2 = getWall(nueva);
-            
-            wall2.position.set( -12.5, 12.5, -50);
-            var wall3 = getWall(nueva);
-            
-            wall3.position.set( 12.5, 12.5, -50);
-            
-            var wall4 = getWall(nueva);
-            wall4.position.set( 37.5, 12.5, -50);
+            wall1.position.set( 0, 12.5, -45);
             scene.add(wall1);
-            scene.add(wall2);
-            scene.add(wall3);
-            scene.add(wall4);
+
+            nueva = att_cliente;
+            var atcliente = getPost(nueva);
+            atcliente.position.set( -15, 2, 13.9);
+            atcliente.rotateY(Math.PI);
+            
+            var atserver = getPost(nueva);
+            atserver.position.set( 15, 2, 13.9);
+            atserver.rotateY(Math.PI);
+            
+            nueva = att_proxy;
+            var atproxy = getPost(nueva);
+            atproxy.position.set( 0, 2, -13.9);
+            
+            scene.add(atcliente);
+            scene.add(atproxy);
+            scene.add(atserver);
+
+            var side1 = getSide();
+            side1.position.set (50, 12.5, 0);
+            side1.rotateX (Math.PI / 2);
+
+            var side2 = getSide();
+            side2.position.set (-50, 12.5, 0);
+            side2.rotateX (Math.PI / 2);
+
+            var side3 = getSide();
+            side3.position.set (0, 12.5, -48.5);
+            side3.rotateY (Math.PI / 2);
+            side3.rotateX (Math.PI / 2);
+            
+
+            scene.add(side1);
+            scene.add(side2);
+            scene.add(side3);
+
             //
             var box = getBox();
             box.position.set (0, 2, -15);
@@ -348,7 +374,14 @@
         }
 ///////////////////////////////////////////////////////////////////////////////////////
         function getWall(nueva) {
-            var geometry = new THREE.PlaneGeometry(25, 25);
+            var geometry = new THREE.PlaneGeometry(20, 20);
+            var material = new THREE.MeshBasicMaterial( { map: nueva });
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
+        function getPost(nueva) {
+            var geometry = new THREE.PlaneGeometry(2.8, 2);
             var material = new THREE.MeshBasicMaterial( { map: nueva });
             var mesh = new THREE.Mesh(geometry, material);
             return mesh;
@@ -357,6 +390,19 @@
         function getBox() {
             var geometry = new THREE.BoxGeometry(3, 2, 4);
             var material = new THREE.MeshBasicMaterial( { map: texture } );
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 2
+            return mesh;
+        }
+
+        function getSide() {
+            var geometry = new THREE.BoxGeometry(3, 100, 25);
+            var material = new THREE.MeshBasicMaterial( { map: muro } );
+            material.map.wrapS = THREE.RepeatWrapping;
+            material.map.wrapT = THREE.RepeatWrapping;
+            material.map.anisotropy = 2;
+            material.map.repeat.set( 2, 2);
+
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 2
             return mesh;
