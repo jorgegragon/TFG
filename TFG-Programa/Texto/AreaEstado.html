@@ -34,6 +34,10 @@
 
         import { Capsule } from '../jsm/math/Capsule.js';
 
+        import { TextGeometry } from '../jsm/geometries/TextGeometry.js';
+
+        import { FontLoader } from '../jsm/loaders/FontLoader.js';
+
         var start = false;
         var resultado = "hola";
         var VelCamara = 0.5;
@@ -135,6 +139,12 @@
             scene.add(box1);
             scene.add(box2);
             scene.add(sphere);
+
+            // TEXTO
+
+            var texto = getText();
+            scene.add( texto );
+        
 
             // RENDERIZADO
             var renderer = new THREE.WebGLRenderer({
@@ -393,6 +403,37 @@
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 2
             return mesh;
+        }
+//////////////////////////////////////////////////////////////////////////////////////////
+        function getText() {
+            const loader = new FontLoader();
+				loader.load( '../jsm/fonts/helvetiker_bold.typeface.json', function ( font ) {
+
+					const textGeo = new TextGeometry( 'S', {
+
+						font: font,
+
+						size: 1,
+						height: 10,
+						curveSegments: 10,
+
+						bevelThickness: 2,
+						bevelSize: 5,
+						bevelEnabled: true
+
+					} );
+
+					textGeo.computeBoundingBox();
+
+					const textMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000} );
+
+					const texto = new THREE.Mesh( textGeo, textMaterial );
+					texto.position.x = 0;
+					texto.position.y = 10;
+                    texto.position.z = 0;
+                    return texto;
+				} );
+
         }
 
         function getSide() {

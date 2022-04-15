@@ -40,12 +40,16 @@
         var stepX = 0.1;
         var stepZ = -0.2;
         var contador = 0;
-        const texture = new THREE.TextureLoader().load( 'textures/crate.gif' );
         const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
         const pared = new THREE.TextureLoader().load( 'textures/secuencia.png' );
-        const muro = new THREE.TextureLoader().load( 'textures/brick.jpg' );
+
         const att_cliente = new THREE.TextureLoader().load( 'textures/att_cliente.png' );
-        const att_proxy = new THREE.TextureLoader().load( 'textures/att_proxy.png' );
+        const register1 = new THREE.TextureLoader().load( '../Texturas/textures/paquetes/register1.png' );
+        var wall1;
+
+
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2( 1, 1 );
     
         // CAMARA
         const clock = new THREE.Clock();
@@ -73,46 +77,13 @@
             // OBJETOS
             var floor = getFloor();
             floor.rotateX( Math.PI / -2 );
-            // Pared
+            floor.name = "suelo";
+
+            // Secuencia
             var nueva = pared;
-            var wall1 = getWall(nueva);
+            wall1 = getWall(nueva);
             wall1.position.set( 0, 12.5, -45);
             scene.add(wall1);
-
-            nueva = att_cliente;
-            var atcliente = getPost(nueva);
-            atcliente.position.set( -15, 2, 13.9);
-            atcliente.rotateY(Math.PI);
-            
-            var atserver = getPost(nueva);
-            atserver.position.set( 15, 2, 13.9);
-            atserver.rotateY(Math.PI);
-            
-            nueva = att_proxy;
-            var atproxy = getPost(nueva);
-            atproxy.position.set( 0, 2, -13.9);
-            
-            scene.add(atcliente);
-            scene.add(atproxy);
-            scene.add(atserver);
-
-            var side1 = getSide();
-            side1.position.set (50, 12.5, 0);
-            side1.rotateX (Math.PI / 2);
-
-            var side2 = getSide();
-            side2.position.set (-50, 12.5, 0);
-            side2.rotateX (Math.PI / 2);
-
-            var side3 = getSide();
-            side3.position.set (0, 12.5, -48.5);
-            side3.rotateY (Math.PI / 2);
-            side3.rotateX (Math.PI / 2);
-            
-
-            scene.add(side1);
-            scene.add(side2);
-            scene.add(side3);
 
             //
             var box = getBox();
@@ -129,12 +100,14 @@
 
             var sphere = getSphere();
             sphere.position.set (-15, 2, 15);
+            sphere.name = "sphere";
 
             scene.add(floor);
             scene.add(box);
             scene.add(box1);
             scene.add(box2);
             scene.add(sphere);
+
 
             // RENDERIZADO
             var renderer = new THREE.WebGLRenderer({
@@ -143,25 +116,8 @@
             renderer.setSize(sceneWidth, sceneHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Titulo Objetos
-            var spritey_cliente = makeTextSprite( " CLIENTE", 
-                { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_cliente.position.set(-14.8, 5, 15);
-            spritey_cliente.scale.set(4,2,1.0);
+            window.addEventListener( 'pointermove', onPointerMove );
 
-            var spritey_proxy = makeTextSprite( " PROXY", 
-                { fontsize: 70, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_proxy.position.set(0, 5, -15);;
-            spritey_proxy.scale.set(4,2,1.0);
-
-            var spritey_servidor = makeTextSprite( "SERVIDOR", 
-                { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_servidor.position.set(15, 5, 15);;
-            spritey_servidor.scale.set(4,2,1.0);
-
-            scene.add(spritey_cliente);
-            scene.add(spritey_proxy);
-            scene.add(spritey_servidor);
 
             // CONTROLES CAMARA
             document.addEventListener( 'keydown', ( event ) => {
@@ -178,9 +134,27 @@
 
             document.addEventListener( 'mousedown', () => {
 
-                document.body.requestPointerLock();
+                //document.body.requestPointerLock();
 
-                mouseTime = performance.now();
+                //mouseTime = performance.now();
+
+                raycaster.setFromCamera( pointer, camera );
+
+                const intersects = raycaster.intersectObject(scene);
+
+                for ( let i = 0; i < intersects.length; i ++ ) {
+                    
+                    if (intersects[i].object.name === "sphere") {
+                        
+                        intersects[i].object.material.color.set( 0xf00000 );
+                        start = false;
+
+                        wall1.material.map = register1;
+
+                    }
+                }
+
+                console.log(intersects[0].object.name);
 
             } );
 
@@ -194,13 +168,13 @@
                 }
 
             } );
-
+            
             // ANIMACIÓN
-            animate(sphere, renderer, scene, camera);
+            animate(renderer, scene, camera, sphere);
 
         }
 
-        function animate(sphere, renderer, scene, camera) {
+        function animate(renderer, scene, camera, sphere) {
 
             if (start) { // Secuencia intercambio paquetes
                 document.getElementById("marcadores").innerHTML = resultado;
@@ -351,14 +325,18 @@
                 sphere.position.z += stepZ;
             }
 
-
             const deltaTime = Math.min( 0.05, clock.getDelta() ) * 4;
             controls( deltaTime );
             updatePlayer( deltaTime );
+            //control.update();
+            //////
+            
 
+            /////
+            
             renderer.render(scene, camera);
             requestAnimationFrame(function() {
-               animate(sphere, renderer, scene, camera);
+               animate(renderer, scene, camera, sphere);
             });
         }
 
@@ -372,37 +350,10 @@
             var mesh = new THREE.Mesh(geometry, material);
             return mesh;
         }
-///////////////////////////////////////////////////////////////////////////////////////
-        function getWall(nueva) {
-            var geometry = new THREE.PlaneGeometry(20, 20);
-            var material = new THREE.MeshBasicMaterial( { map: nueva });
-            var mesh = new THREE.Mesh(geometry, material);
-            return mesh;
-        }
 
-        function getPost(nueva) {
-            var geometry = new THREE.PlaneGeometry(2.8, 2);
-            var material = new THREE.MeshBasicMaterial( { map: nueva });
-            var mesh = new THREE.Mesh(geometry, material);
-            return mesh;
-        }
-//////////////////////////////////////////////////////////////////////////////////////////
         function getBox() {
             var geometry = new THREE.BoxGeometry(3, 2, 4);
-            var material = new THREE.MeshBasicMaterial( { map: texture } );
-            var mesh = new THREE.Mesh(geometry, material);
-            mesh.position.z = 2
-            return mesh;
-        }
-
-        function getSide() {
-            var geometry = new THREE.BoxGeometry(3, 100, 25);
-            var material = new THREE.MeshBasicMaterial( { map: muro } );
-            material.map.wrapS = THREE.RepeatWrapping;
-            material.map.wrapT = THREE.RepeatWrapping;
-            material.map.anisotropy = 2;
-            material.map.repeat.set( 2, 2);
-
+            var material = new THREE.MeshBasicMaterial( { color : 0x0000ff} );
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 2
             return mesh;
@@ -418,39 +369,18 @@
             return mesh;
         }
 
+        function getWall(nueva) {
+            var geometry = new THREE.PlaneGeometry(20, 20);
+            var material = new THREE.MeshBasicMaterial( { map: nueva });
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize( window.innerWidth, window.innerHeight );
             animate();
-        }
-
-        function makeTextSprite( message, parameters ){
-            if ( parameters === undefined ) parameters = {};
-            var fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Courier New";
-            var fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 18;
-            var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 4;
-            var borderColor = parameters.hasOwnProperty("borderColor") ?parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
-            var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?parameters["backgroundColor"] : { r:0, g:0, b:255, a:1.0 };
-            var textColor = parameters.hasOwnProperty("textColor") ?parameters["textColor"] : { r:0, g:0, b:0, a:1.0 };
-
-            var canvas = document.createElement('canvas');
-            var context = canvas.getContext('2d');
-            context.font = "Bold " + fontsize + "px " + fontface;
-            var metrics = context.measureText( message );
-            var textWidth = metrics.width;
-
-            context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," + backgroundColor.b + "," + backgroundColor.a + ")";
-            context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," + borderColor.b + "," + borderColor.a + ")";
-            context.fillStyle = "rgba("+textColor.r+", "+textColor.g+", "+textColor.b+", 1.0)";
-            context.fillText( message, borderThickness, fontsize + borderThickness);
-
-            var texture = new THREE.Texture(canvas) 
-            texture.needsUpdate = true;
-            var spriteMaterial = new THREE.SpriteMaterial( { map: texture} );
-            var sprite = new THREE.Sprite( spriteMaterial );
-            //sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
-            return sprite;  
         }
 
         function controls( deltaTime ) {
@@ -483,9 +413,13 @@
 
             if ( keyStates[ 'Space' ] ) {
 
-                    start = true;
+                start = true;
+                wall1.material.map = pared;
+
+                if (contador == 0) {
                     resultado = "Register";      
                     document.getElementById("marcadores").innerHTML = resultado;
+                }
                
             }
 
@@ -536,6 +470,16 @@
             playerCollider.translate( deltaPosition );
 
             camera.position.copy( playerCollider.end );
+
+        }
+
+        function onPointerMove( event ) {
+
+            // calculate pointer position in normalized device coordinates
+            // (-1 to +1) for both components
+
+            pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
         }
 
