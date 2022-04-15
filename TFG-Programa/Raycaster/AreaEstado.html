@@ -40,11 +40,11 @@
         var stepX = 0.1;
         var stepZ = -0.2;
         var contador = 0;
-        const suelo = new THREE.TextureLoader().load( 'textures/sueloblanco.jpg' );
-        const pared = new THREE.TextureLoader().load( 'textures/secuencia.png' );
+        const suelo = new THREE.TextureLoader().load( '../Imagenes/textures/sueloblanco.jpg' );
+        const pared = new THREE.TextureLoader().load( '../Imagenes/parametros/secuencia.png' );
 
-        const att_cliente = new THREE.TextureLoader().load( 'textures/att_cliente.png' );
-        const register1 = new THREE.TextureLoader().load( '../Texturas/textures/paquetes/register1.png' );
+        const att_cliente = new THREE.TextureLoader().load( '../Imagenes/parametros/attproxy.png' );
+        const register1 = new THREE.TextureLoader().load( '../Imagenes/paquetes/register2.png' );
         var wall1;
 
 
@@ -89,6 +89,7 @@
             var box = getBox();
             box.position.set (0, 2, -15);
             box.rotateX (Math.PI / 2);
+            box.name = "UA1";
 
             var box1 = getBox();
             box1.position.set (-15, 2, 15);
@@ -150,6 +151,14 @@
                         start = false;
 
                         wall1.material.map = register1;
+
+                    }
+                    if (intersects[i].object.name === "UA1") {
+                        
+                        intersects[i].object.material.color.set( 0xf00000 );
+                        start = false;
+
+                        wall1.material.map = att_cliente;
 
                     }
                 }
