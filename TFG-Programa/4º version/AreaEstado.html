@@ -46,7 +46,7 @@
         // Imagenes
         const texture = new THREE.TextureLoader().load( '../Imagenes/textures/crate.gif' );
         const suelo = new THREE.TextureLoader().load( '../Imagenes/textures/sueloblanco.jpg' );
-        const muro = new THREE.TextureLoader().load( '../Imagenes/textures/brick.jpg' );
+        const muro = new THREE.TextureLoader().load( '../Imagenes/textures/extura.jpg' );
 
         const pared = new THREE.TextureLoader().load( '../Imagenes/parametros/secuencia.png' );
         const att_ua1= new THREE.TextureLoader().load( '../Imagenes/parametros/attua1.png' );
@@ -80,6 +80,7 @@
     
         // Pantalla
         var wall1;
+        var sphere;
 
         // Selección
         const raycaster = new THREE.Raycaster();
@@ -152,8 +153,10 @@
             box2.rotateX (Math.PI / 2);
             box2.name = "UA2";
 
-            var sphere = getSphere();
+            sphere = getSphere();
             sphere.position.set (-15, 2, 15);
+            sphere.rotateX (Math.PI/2);
+            sphere.rotateY (Math.PI/-2);
             sphere.name = "sphere";
 
             scene.add(floor);
@@ -172,9 +175,9 @@
             window.addEventListener( 'pointermove', onPointerMove );
 
             // Titulo Objetos
-            var spritey_cliente = makeTextSprite( "UA1", 
-                { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_cliente.position.set(-14, 5, 15);
+            var spritey_cliente = makeTextSprite( " UA1", 
+                { fontsize: 90, textColor: {r:0, g:0, b:0, a:1.0}} );
+            spritey_cliente.position.set(-15, 5, 15);
             spritey_cliente.scale.set(4,2,1.0);
 
             var spritey_proxy = makeTextSprite( " PROXY", 
@@ -182,9 +185,9 @@
             spritey_proxy.position.set(0, 5, -15);;
             spritey_proxy.scale.set(4,2,1.0);
 
-            var spritey_servidor = makeTextSprite( "UA2", 
-                { fontsize: 60, textColor: {r:0, g:0, b:0, a:1.0}} );
-            spritey_servidor.position.set(16, 5, 15);;
+            var spritey_servidor = makeTextSprite( " UA2", 
+                { fontsize: 90, textColor: {r:0, g:0, b:0, a:1.0}} );
+            spritey_servidor.position.set(15, 5, 15);;
             spritey_servidor.scale.set(4,2,1.0);
 
             scene.add(spritey_cliente);
@@ -204,10 +207,17 @@
 
             } );
 
+            document.addEventListener( 'mouseup', () => {
+
+                document.exitPointerLock();
+                mouseTime = 0;
+
+            });
+
             document.addEventListener( 'mousedown', () => {
 
-                //document.body.requestPointerLock();
-                //mouseTime = performance.now();
+                document.body.requestPointerLock();
+                mouseTime = performance.now();
 
                 raycaster.setFromCamera( pointer, camera );
 
@@ -217,7 +227,8 @@
 
                     switch (intersects[i].object.name) {
                             case "sphere":
-                                intersects[i].object.material.color.set( 0xf00000 );
+                                intersects[i].object.material.color.set( 0x000000 );
+                                intersects[i].object.geometry = new THREE.SphereGeometry(0.5, 32, 20, 0, 5.8, 0, Math.PI);
                                 start = false;
                                 switch (estado) {
                                     case "Register UA1":
@@ -543,7 +554,7 @@
             var geometry = new THREE.BoxGeometry(3, 2, 4);
             var material = new THREE.MeshBasicMaterial( { map: texture } );
             var mesh = new THREE.Mesh(geometry, material);
-            mesh.position.z = 2
+            mesh.position.z = 2;
             return mesh;
         }
 
@@ -552,17 +563,17 @@
             var material = new THREE.MeshBasicMaterial( { map: muro } );
             material.map.wrapS = THREE.RepeatWrapping;
             material.map.wrapT = THREE.RepeatWrapping;
-            material.map.anisotropy = 2;
-            material.map.repeat.set( 2, 2);
+            material.map.anisotropy = 4;
+            material.map.repeat.set( 4, 8);
 
             var mesh = new THREE.Mesh(geometry, material);
-            mesh.position.z = 2
+            mesh.position.z = 2;
             return mesh;
         }
 
         function getSphere() {
-            var geometry = new THREE.SphereGeometry(0.5, 20, 20);
-            var material = new THREE.MeshBasicMaterial({color: "red"});
+            var geometry = new THREE.SphereGeometry(0.5, 32, 20);
+            var material = new THREE.MeshBasicMaterial({color: "red"}); 
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 0.5;
             mesh.castShadow = true;
@@ -637,6 +648,7 @@
 
                 start = true;
                 wall1.material.map = pared;
+                sphere.geometry = new THREE.SphereGeometry(0.5, 32, 20, 0, Math.PI*2, 0, Math.PI);
                 if (contador == 0) {
                     resultado = "Register";      
                     estado = "Register UA1"; 
