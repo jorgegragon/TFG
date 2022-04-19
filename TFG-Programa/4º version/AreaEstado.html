@@ -227,7 +227,6 @@
 
                     switch (intersects[i].object.name) {
                             case "sphere":
-                                intersects[i].object.material.color.set( 0x000000 );
                                 intersects[i].object.geometry = new THREE.SphereGeometry(0.5, 32, 20, 0, 5.8, 0, Math.PI);
                                 start = false;
                                 switch (estado) {
@@ -505,7 +504,7 @@
                         estado = ("RTP");
                         sphere.material.color = new THREE.Color("blue");    
                     }
-                    contador += 1;    
+                    contador += 1;   
                 }
 
                 if (sphere.position.x < -15 && contador == 16){
