@@ -182,6 +182,18 @@
             
             document.body.appendChild( VRButton.createButton( renderer ) );
 
+            function onSelectStart() {
+
+                this.userData.isSelecting = true;
+
+            }
+
+            function onSelectEnd() {
+
+                this.userData.isSelecting = false;
+
+            }
+
             controller1 = renderer.xr.getController( 0 );
             controller1.addEventListener( 'selectstart', onSelectStart );
             controller1.addEventListener( 'selectend', onSelectEnd );
