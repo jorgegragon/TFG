@@ -34,6 +34,8 @@
 
         import { Capsule } from '../jsm/math/Capsule.js';
 
+        import { VRButton } from '../jsm/webxr/VRButton.js';
+
         // Secuencia
         var start = false;
         var resultado = "hola";
@@ -171,6 +173,8 @@
             });
             renderer.setSize(sceneWidth, sceneHeight);
             document.body.appendChild(renderer.domElement);
+            
+            document.body.appendChild( VRButton.createButton( renderer ) );
 
             window.addEventListener( 'pointermove', onPointerMove );
 
