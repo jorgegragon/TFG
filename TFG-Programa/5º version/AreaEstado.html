@@ -36,6 +36,8 @@
 
         import { VRButton } from '../jsm/webxr/VRButton.js';
 
+        import { XRControllerModelFactory } from '../jsm/webxr/XRControllerModelFactory.js';
+
         // Secuencia
         var start = false;
         var resultado = "hola";
@@ -44,6 +46,9 @@
         var stepX = 0.1;
         var stepZ = -0.2;
         var contador = 0;
+
+        let controller1, controller2;
+		let controllerGrip1, controllerGrip2;
 
         // Imagenes
         const texture = new THREE.TextureLoader().load( '../Imagenes/textures/crate.gif' );
@@ -172,9 +177,43 @@
                 antialias : true
             });
             renderer.setSize(sceneWidth, sceneHeight);
+            renderer.xr.enabled = true;
             document.body.appendChild(renderer.domElement);
             
             document.body.appendChild( VRButton.createButton( renderer ) );
+
+            controller1 = renderer.xr.getController( 0 );
+            controller1.addEventListener( 'selectstart', onSelectStart );
+            controller1.addEventListener( 'selectend', onSelectEnd );
+            controller1.addEventListener( 'connected', function ( event ) {
+
+                this.add( buildController( event.data ) );
+
+            } );
+            controller1.addEventListener( 'disconnected', function () {
+
+                this.remove( this.children[ 0 ] );
+
+            } );
+            scene.add( controller1 );
+
+            controller2 = renderer.xr.getController( 1 );
+            controller2.addEventListener( 'selectstart', onSelectStart );
+            controller2.addEventListener( 'selectend', onSelectEnd );
+            controller2.addEventListener( 'connected', function ( event ) {
+
+                this.add( buildController( event.data ) );
+
+            } );
+            controller2.addEventListener( 'disconnected', function () {
+
+                this.remove( this.children[ 0 ] );
+
+            } );
+            scene.add( controller2 );
+
+            const controllerModelFactory = new XRControllerModelFactory();
+
 
             window.addEventListener( 'pointermove', onPointerMove );
 
@@ -197,6 +236,15 @@
             scene.add(spritey_cliente);
             scene.add(spritey_proxy);
             scene.add(spritey_servidor);
+
+            // VR
+            controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+			controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+			scene.add( controllerGrip1 );
+
+			controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+			controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+			scene.add( controllerGrip2 );
 
             // CONTROLES CAMARA
             document.addEventListener( 'keydown', ( event ) => {
