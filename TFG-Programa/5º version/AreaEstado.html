@@ -258,6 +258,8 @@
 			controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
 			scene.add( controllerGrip2 );
 
+            window.addEventListener( 'resize', onWindowResize );
+
             // CONTROLES CAMARA
             document.addEventListener( 'keydown', ( event ) => {
 
@@ -589,10 +591,16 @@
             controls( deltaTime );
             updatePlayer( deltaTime );
 
-            renderer.render(scene, camera);
+            renderer.setAnimationLoop( function () {
+
+                renderer.render( scene, camera );
+                animate(sphere, renderer, scene, camera);
+
+            } );
+/*
             requestAnimationFrame(function() {
                animate(sphere, renderer, scene, camera);
-            });
+            });*/
         }
 
         function getFloor() {
@@ -647,6 +655,7 @@
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
+            
             renderer.setSize( window.innerWidth, window.innerHeight );
             animate();
         }
