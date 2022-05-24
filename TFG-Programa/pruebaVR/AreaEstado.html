@@ -47,7 +47,7 @@
         var stepZ = -0.2;
         var contador = 0;
 
-        let controller1, controller2;
+        let controller1, controller2, controller3, controller4, controller5, controller6;
 		let controllerGrip1, controllerGrip2;
     
         // Pantalla
@@ -62,6 +62,14 @@
 
 
         const att_proxy_inf = new THREE.TextureLoader().load( '../Imagenes/parametros/att_proxyinf.png' );
+
+        const register_ua1 = new THREE.TextureLoader().load( '../Imagenes/paquetes/Register1.png' );
+        const register_ua2 = new THREE.TextureLoader().load( '../Imagenes/paquetes/Register2.png' );
+        const unauthorized = new THREE.TextureLoader().load( '../Imagenes/paquetes/401unauthorized.png' );
+        const ok_proxy_reg_ua1 = new THREE.TextureLoader().load( '../Imagenes/paquetes/200okproxyua1.png' );
+        const ok_proxy_reg_ua2 = new THREE.TextureLoader().load( '../Imagenes/paquetes/200okproxyua2.png' );
+        const invite_ua1 = new THREE.TextureLoader().load( '../Imagenes/paquetes/invite+sdpua1.png' );
+        const invite_ua2 = new THREE.TextureLoader().load( '../Imagenes/paquetes/invite+sdpua2.png' );
 
         // Selección
         const raycaster = new THREE.Raycaster();
@@ -173,6 +181,22 @@
 			controller2 = renderer.xr.getController( 1 );
 			controller2.addEventListener( 'selectstart', onSelectStart1 );
 			scene.add( controller2 );
+
+            controller3 = renderer.xr.getController( 2 );
+			controller3.addEventListener( 'selectstart', onSelectStart2 );
+			scene.add( controller3 );
+
+			controller4 = renderer.xr.getController( 3 );
+			controller4.addEventListener( 'selectstart', onSelectStart3 );
+			scene.add( controller4 );
+
+            controller5 = renderer.xr.getController( 4 );
+			controller5.addEventListener( 'selectstart', onSelectStart4 );
+			scene.add( controller5 );
+
+			controller6 = renderer.xr.getController( 5 );
+			controller6.addEventListener( 'selectstart', onSelectStart5 );
+			scene.add( controller6 );
 
             window.addEventListener( 'resize', onWindowResize );
 
@@ -292,9 +316,33 @@
 
         }
 
+        function onSelectStart2( event ) {
+
+            wall1.material.map = register_ua1;
+
+        }
+
+        function onSelectStart3( event ) {
+
+            wall1.material.map = register_ua2;
+
+        }
+
+        function onSelectStart4( event ) {
+
+            wall1.material.map = register_ua1;
+
+        }
+
+        function onSelectStart5( event ) {
+
+            wall1.material.map = ok_proxy_reg_ua1;
+
+        }
+
         function onSelectEnd( event ) {
 
-            wall1.material.map = att_proxy_inf;
+            wall1.material.map = ok_proxy_reg_ua2;
             
         }
 
