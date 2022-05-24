@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Three.js: ESCENA 3D</title>
+<style>
+    #marcadores {
+	    position: absolute;
+        text-align: center;
+		top: 70px; width: 100%;
+		padding: 5px;
+        font-size: 40px;
+        color: black;
+	}
+</style>
+
+</head>
+
+<body>
+    <div id="marcadores">Intercambio de paquetes</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../jsm/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from '../jsm/controls/OrbitControls.js';
+
+        import { Capsule } from '../jsm/math/Capsule.js';
+
+        import { VRButton } from '../jsm/webxr/VRButton.js';
+
+        import { XRControllerModelFactory } from '../jsm/webxr/XRControllerModelFactory.js';
+
+        // Secuencia
+        var start = false;
+        var resultado = "hola";
+        var estado;
+        var VelCamara = 0.5;
+        var stepX = 0.1;
+        var stepZ = -0.2;
+        var contador = 0;
+
+        let controller1, controller2;
+		let controllerGrip1, controllerGrip2;
+    
+        // Pantalla
+        var wall1;
+        var sphere;
+
+        const texture = new THREE.TextureLoader().load( '../Imagenes/textures/crate.gif' );
+        const suelo = new THREE.TextureLoader().load( '../Imagenes/textures/sueloblanco.jpg' );
+        const muro = new THREE.TextureLoader().load( '../Imagenes/textures/extura.jpg' );
+
+        const pared = new THREE.TextureLoader().load( '../Imagenes/parametros/secuencia.png' );
+
+
+        const att_proxy_inf = new THREE.TextureLoader().load( '../Imagenes/parametros/att_proxyinf.png' );
+
+        // Selección
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2( 1, 1 );
+
+        // CAMARA
+        const clock = new THREE.Clock();
+        const playerVelocity = new THREE.Vector3();
+        const playerDirection = new THREE.Vector3();
+        const keyStates = {};
+        let mouseTime = 0;
+        const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 30, 100), 0.35 );//( 0, 3, 30)        
+        const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    
+
+        init();
+    
+    
+        function init() {
+            // ESCENA
+            var scene = new THREE.Scene();
+            var sceneWidth = window.innerWidth;
+            var sceneHeight = window.innerHeight;
+            scene.background = new THREE.Color(0x5E7E9F);
+
+            // CAMARA
+            camera.rotation.order = 'YXZ';
+
+            // OBJETOS
+            var floor = getFloor();
+            floor.rotateX( Math.PI / -2 );
+            floor.name = "suelo";
+
+            // Pared
+            wall1 = getWall(pared);
+            wall1.position.set( 0, 12.5, -45);
+            scene.add(wall1);
+
+            var side1 = getSide();
+            side1.position.set (50, 12.5, 0);
+            side1.rotateX (Math.PI / 2);
+
+            var side2 = getSide();
+            side2.position.set (-50, 12.5, 0);
+            side2.rotateX (Math.PI / 2);
+
+            var side3 = getSide();
+            side3.position.set (0, 12.5, -48.5);
+            side3.rotateY (Math.PI / 2);
+            side3.rotateX (Math.PI / 2);
+            
+
+            scene.add(side1);
+            scene.add(side2);
+            scene.add(side3);
+
+            //
+            var box = getBox();
+            box.position.set (0, 2, -15);
+            box.rotateX (Math.PI / 2);
+            box.name = "proxy";
+
+            var box1 = getBox();
+            box1.position.set (-15, 2, 15);
+            box1.rotateX (Math.PI / 2);
+            box1.name = "UA1";
+
+            var box2 = getBox();
+            box2.position.set (15, 2, 15);
+            box2.rotateX (Math.PI / 2);
+            box2.name = "UA2";
+
+            sphere = getSphere();
+            sphere.position.set (-15, 2, 15);
+            sphere.rotateX (Math.PI/2);
+            sphere.rotateY (Math.PI/-2);
+            sphere.name = "sphere";
+
+            scene.add(floor);
+            scene.add(box);
+            scene.add(box1);
+            scene.add(box2);
+            scene.add(sphere);
+
+            // RENDERIZADO
+            var renderer = new THREE.WebGLRenderer({
+                antialias : true
+            });
+            renderer.setSize(sceneWidth, sceneHeight);
+            renderer.xr.enabled = true;
+            renderer.xr.getCamera( camera );
+            document.body.appendChild(renderer.domElement);
+            
+            document.body.appendChild( VRButton.createButton( renderer ) );
+
+
+            const controllerModelFactory = new XRControllerModelFactory();
+
+
+            window.addEventListener( 'pointermove', onPointerMove );
+
+            // VR
+            // controllers
+
+            controller1 = renderer.xr.getController( 0 );
+			controller1.addEventListener( 'selectstart', onSelectStart );
+			controller1.addEventListener( 'selectend', onSelectEnd );
+			scene.add( controller1 );
+
+			controller2 = renderer.xr.getController( 1 );
+			controller2.addEventListener( 'selectstart', onSelectStart );
+			controller2.addEventListener( 'selectend', onSelectEnd );
+			scene.add( controller2 );
+
+            controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+			controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+			scene.add( controllerGrip1 );
+
+			controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+			controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+			scene.add( controllerGrip2 );
+
+            window.addEventListener( 'resize', onWindowResize );
+
+
+
+            // ANIMACIÓN
+            animate(sphere, renderer, scene, camera);
+
+        }
+
+        function animate(sphere, renderer, scene, camera) {
+
+            renderer.setAnimationLoop( function () {
+
+                renderer.render( scene, camera );
+                animate(sphere, renderer, scene, camera);
+
+            } );
+
+        }
+
+        function getFloor() {
+            var geometry = new THREE.PlaneGeometry(100, 100);
+            var material = new THREE.MeshBasicMaterial( { map: suelo });
+            material.map.wrapS = THREE.RepeatWrapping;
+            material.map.wrapT = THREE.RepeatWrapping;
+            material.map.anisotropy = 4;
+            material.map.repeat.set( 4, 4);
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+///////////////////////////////////////////////////////////////////////////////////////
+        function getWall(nueva) {
+            var geometry = new THREE.PlaneGeometry(20, 20);
+            var material = new THREE.MeshBasicMaterial( { map: nueva });
+            var mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+//////////////////////////////////////////////////////////////////////////////////////////
+        function getBox() {
+            var geometry = new THREE.BoxGeometry(3, 2, 4);
+            var material = new THREE.MeshBasicMaterial( { map: texture } );
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 2;
+            return mesh;
+        }
+
+        function getSide() {
+            var geometry = new THREE.BoxGeometry(3, 100, 25);
+            var material = new THREE.MeshBasicMaterial( { map: muro } );
+            material.map.wrapS = THREE.RepeatWrapping;
+            material.map.wrapT = THREE.RepeatWrapping;
+            material.map.anisotropy = 4;
+            material.map.repeat.set( 4, 8);
+
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 2;
+            return mesh;
+        }
+
+        function getSphere() {
+            var geometry = new THREE.SphereGeometry(0.5, 32, 20);
+            var material = new THREE.MeshBasicMaterial({color: "red"}); 
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = 0.5;
+            mesh.castShadow = true;
+            mesh.name = "sphere";
+            return mesh;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            animate();
+        }
+
+
+        function getForwardVector() {
+
+            camera.getWorldDirection( playerDirection );
+            playerDirection.y = 0;
+            playerDirection.normalize();
+
+            return playerDirection;
+
+        }
+
+        function getSideVector() {
+
+            camera.getWorldDirection( playerDirection );
+            playerDirection.y = 0;
+            playerDirection.normalize();
+            playerDirection.cross( camera.up );
+
+            return playerDirection;
+
+        }
+
+        function onPointerMove( event ) {
+
+            pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+        }
+
+        function onSelectStart( event ) {
+
+            wall1.material.map = att_proxy_inf;
+
+        }
+
+        function onSelectEnd( event ) {
+
+            wall1.material.map = att_proxy_inf;
+            
+        }
+
+        
+
+    </script>
+</body>
+
+</html>
