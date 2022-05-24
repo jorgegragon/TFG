@@ -48,7 +48,7 @@
         var contador = 0;
 
         let controller1, controller2, controller3, controller4, controller5, controller6;
-		let controllerGrip1, controllerGrip2;
+		let controllerGrip1, controllerGrip2, controllerGrip3, controllerGrip4, controllerGrip5;
     
         // Pantalla
         var wall1;
@@ -181,25 +181,29 @@
 			controller2 = renderer.xr.getController( 1 );
 			controller2.addEventListener( 'selectstart', onSelectStart1 );
 			scene.add( controller2 );
+            ////////////
 
-            controller3 = renderer.xr.getController( 2 );
-			controller3.addEventListener( 'selectstart', onSelectStart2 );
-			scene.add( controller3 );
+			controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+			controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+            controllerGrip1.addEventListener( 'selectstart', onSelectStart2 );
+			scene.add( controllerGrip1 );
 
-			controller4 = renderer.xr.getController( 3 );
-			controller4.addEventListener( 'selectstart', onSelectStart3 );
-			scene.add( controller4 );
+			controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+			controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+            controllerGrip2.addEventListener( 'selectstart', onSelectStart3 );
+			scene.add( controllerGrip2 );
 
-            controller5 = renderer.xr.getController( 4 );
-			controller5.addEventListener( 'selectstart', onSelectStart4 );
-			scene.add( controller5 );
+            controllerGrip3 = renderer.xr.getControllerGrip( 3 );
+			controllerGrip3.add( controllerModelFactory.createControllerModel( controllerGrip3 ) );
+            controllerGrip3.addEventListener( 'selectstart', onSelectStart4 );
+			scene.add( controllerGrip3 );
 
-			controller6 = renderer.xr.getController( 5 );
-			controller6.addEventListener( 'selectstart', onSelectStart5 );
-			scene.add( controller6 );
+			controllerGrip4 = renderer.xr.getControllerGrip( 4 );
+			controllerGrip4.add( controllerModelFactory.createControllerModel( controllerGrip4 ) );
+            controllerGrip4.addEventListener( 'selectstart', onSelectStart5 );
+			scene.add( controllerGrip4 );
 
-            console.log(controller1.data);
-
+            ///////////////
             window.addEventListener( 'resize', onWindowResize );
 
             // ANIMACIÓN
