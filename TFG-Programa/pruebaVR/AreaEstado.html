@@ -193,16 +193,6 @@
             controllerGrip2.addEventListener( 'selectstart', onSelectStart3 );
 			scene.add( controllerGrip2 );
 
-            controllerGrip3 = renderer.xr.getControllerGrip( 3 );
-			controllerGrip3.add( controllerModelFactory.createControllerModel( controllerGrip3 ) );
-            controllerGrip3.addEventListener( 'selectstart', onSelectStart4 );
-			scene.add( controllerGrip3 );
-
-			controllerGrip4 = renderer.xr.getControllerGrip( 4 );
-			controllerGrip4.add( controllerModelFactory.createControllerModel( controllerGrip4 ) );
-            controllerGrip4.addEventListener( 'selectstart', onSelectStart5 );
-			scene.add( controllerGrip4 );
-
             ///////////////
             window.addEventListener( 'resize', onWindowResize );
 
