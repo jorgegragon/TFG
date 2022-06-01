@@ -3,6 +3,9 @@
 
 <head>
 <title>Three.js: ESCENA 3D</title>
+
+<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+
 <style>
     #marcadores {
 	    position: absolute;
@@ -172,6 +175,7 @@
             window.addEventListener( 'pointermove', onPointerMove );
 
             // VR
+            
             // controllers
 
             controller1 = renderer.xr.getController( 0 );
@@ -183,15 +187,17 @@
 			scene.add( controller2 );
             ////////////
 
-			controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+			controllerGrip1 = renderer.xr.getControllerGrip( 4 );
 			controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
             controllerGrip1.addEventListener( 'selectstart', onSelectStart2 );
 			scene.add( controllerGrip1 );
 
-			controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+			controllerGrip2 = renderer.xr.getControllerGrip( 4 );
 			controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
             controllerGrip2.addEventListener( 'selectstart', onSelectStart3 );
 			scene.add( controllerGrip2 );
+
+           
 
             ///////////////
             window.addEventListener( 'resize', onWindowResize );
@@ -204,7 +210,8 @@
         function animate(sphere, renderer, scene, camera) {
 
             renderer.setAnimationLoop( function () {
-
+                console.log(controllerGrip1);
+                //console.log(controllerGrip1.thumbrest_pressed_max);
                 renderer.render( scene, camera );
                 animate(sphere, renderer, scene, camera);
 
